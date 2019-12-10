@@ -1,5 +1,5 @@
 # Recommend System Practice Code & Note
-项亮《推荐系统实践》的Python3代码实现
+项亮《推荐系统实践》的Python3代码实现，原书的code只是帮助理解，实际运行效率较低。我尝试重写这些代码。
 > Start on 2019.12.9
 
 ## 笔记
