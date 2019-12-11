@@ -1,5 +1,5 @@
 # Recommend System Practice Code & Note
-项亮《推荐系统实践》的Python3代码实现，原书的code只是帮助理解，实际运行效率较低。我尝试重写这些代码。
+项亮《推荐系统实践》的Python3代码实现，原书的code只是帮助理解，实际运行效率较低。我尝试重写这些代码，可能的话使用numpy。
 > Start on 2019.12.9
 
 ## 笔记
@@ -25,5 +25,5 @@
 3. 对结果进行评估
 > [Code Data](http://files.grouplens.org/datasets/movielens/ml-1m.zip)
 
-* 更改了原书明显不合理的地方，增加了随机抽取部分Data进行debug的功能
-* 感觉无法矩阵化，计算效率比较低
+* userCF.py：更改了原书明显不合理的地方，增加了随机抽取部分Data进行debug的功能，但计算效率比较低，跑完整数据非常耗时
+* userCFNumpy.py：使用numpy重构，更改最耗时的相似度计算部分。直接生成userNum * itemNum的矩阵A，保存user-item的记录，利用A * A.T来计算user-user发生关联的次数。6040 * 3952的矩阵算的还是很快的。但因为没有了精确的相似度数值，只有相似度排名，所以无法达到预期的效果，但各指标随k的变化趋势是正确的
