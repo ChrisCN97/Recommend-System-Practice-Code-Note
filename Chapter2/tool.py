@@ -7,12 +7,12 @@ import math
 - UserIDs range between 1 and 6040 
 - MovieIDs range between 1 and 3952
 """
-def loadRatingData(lineRate=-1):
+def loadRatingData(lineRate=1):
     data = open("ml-1m/ratings.dat").readlines()  # UserID::MovieID::Rating::Timestamp
     lineNum = len(data)
     data = [tuple(map(int, s.split("::")[:2])) for s in data]
     # 取少部分数据进行测试
-    if lineRate != -1:
+    if lineRate != 1:
         data = random.sample(data, int(lineRate*lineNum))  # 随机抽取 lineNum 个数据
     return data
 
@@ -23,7 +23,7 @@ def list2dic(L):
         retDic[item[0]].add(item[1])
     return retDic
 
-def splitData(M, k, lineRate=-1, seed=1):
+def splitData(M, k, lineRate=1, seed=1):
     data = loadRatingData(lineRate)
     test = []
     train = []
@@ -40,44 +40,52 @@ class Evaluator:
     train, test: dict(int: set())
     topN: int
     GetRecommendation: function()
-    rankList: dict(int: dict(int: int))
+    rankList: dict(int: list[tuple(int, int)])
     """
-    def __init__(self, train, test, rankList, topN):
+    def __init__(self, train, test, rankList, topN, dataScale):
         self.train = train
         self.test = test
         self.rankList = rankList
         self.topN = topN
+        self.dataScale = dataScale
 
+    # recall 和 precision 应该针对test集的数据进行分析
     def recall(self):
         all = 0
         hit = 0
-        for user in self.train.keys():
-            if user not in self.test:
+        for user in self.test.keys():
+            # 在取少部分值进行推荐时，可能会有rank为空的情况，直接跳过
+            if len(self.rankList[user]) == 0:
                 continue
             Tu = self.test[user]
-            Ru = set(self.rankList[user].keys())
-            hit += len(Tu & Ru)
+            for item in self.rankList[user]:
+                if item[0] in Tu:
+                    hit += 1
             all += len(Tu)
         return hit / float(all)
 
     def precision(self):
         all = 0
         hit = 0
-        for user in self.train.keys():
-            if user not in self.test:
+        for user in self.test.keys():
+            if len(self.rankList[user]) == 0:
                 continue
             Tu = self.test[user]
-            Ru = set(self.rankList[user].keys())
-            hit += len(Tu & Ru)
-            all += len(Ru)
+            for item in self.rankList[user]:
+                if item[0] in Tu:
+                    hit += 1
+            all += len(self.rankList[user])
         return hit / float(all)
 
     def coverage(self):
         recommendItem = set()
         allItems = set()
         for user in self.train.keys():
+            if user not in self.rankList or len(self.rankList[user]) == 0:
+                continue
             allItems.update(self.train[user])
-            recommendItem.update(list(self.rankList[user].keys()))
+            for item in self.rankList[user]:
+                recommendItem.add(item[0])
         return len(recommendItem) / float(len(allItems))
 
     def popularity(self):
@@ -87,9 +95,11 @@ class Evaluator:
                 itemPopularity[item] = itemPopularity.get(item, 0) + 1
         ret = 0
         n = 0
-        for user in self.train.keys():
-            for item in self.rankList[user].keys():
-                ret += math.log(1 + itemPopularity[item])
+        for user in self.test.keys():
+            if len(self.rankList[user]) == 0:
+                continue
+            for item in self.rankList[user]:
+                ret += math.log(1 + itemPopularity[item[0]])
                 n += 1
         ret /= n
         return ret
@@ -99,13 +109,5 @@ class Evaluator:
         precision = self.precision()
         coverage = self.coverage()
         popularity = self.popularity()
-        print("topN:", self.topN, "recall:", recall, "precision:", precision, "coverage:", coverage, "popularity:", popularity)
+        print("dataScale:", self.dataScale, "topN:", self.topN, "precision:", precision, "recall:", recall, "coverage:", coverage, "popularity:", popularity)
         return recall, precision, coverage, popularity
-
-def test():
-    train, test = splitData(8, 0)
-    rankList = dict()
-    eva = Evaluator(train, test, rankList)
-
-
-# test()
