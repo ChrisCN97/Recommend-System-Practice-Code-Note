@@ -19,7 +19,8 @@ def loadRatingData(lineRate=1):
 def list2dic(L):
     retDic = dict()
     for item in L:
-        retDic[item[0]] = retDic.get(item[0], set())
+        if item[0] not in retDic:
+            retDic[item[0]] = set()
         retDic[item[0]].add(item[1])
     return retDic
 
