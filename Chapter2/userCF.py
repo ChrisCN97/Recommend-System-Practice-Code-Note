@@ -52,7 +52,7 @@ def recommend(user, train, W, userN, itemN):
 
 def userCF(userN, itemN, dataScale):
     print("加载数据...")
-    train, test = tool.splitData(8, 0, dataScale)
+    train, test = tool.splitData(dataScale, 8, 0)
     rankList = dict()
     W = userSimilarity(train)
     print("进行推荐...")
@@ -65,7 +65,7 @@ def userCF(userN, itemN, dataScale):
 
 # userN, itemN, dataScale
 # 取前N个相关用户，取前N个推荐物品，数据取dataScale%
-userCF(80, 10, 0.5)
+userCF(80, 10, 0.1)
 #dataScale: 0.1 topN: 8 precision: 0.003925417075564278 recall: 0.012327773749093546 coverage: 0.7647241165530069 popularity: 4.132750171483042
 #dataScale: 0.2 topN: 8 precision: 0.009711165756679031 recall: 0.021062146892655367 coverage: 0.7249124854142357 popularity: 4.988955540712396
 #dataScale: 0.2 topN: 80 precision: 0.016363636363636365 recall: 0.035796610169491525 coverage: 0.23561882626380012 popularity: 5.793893530988032

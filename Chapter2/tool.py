@@ -7,7 +7,7 @@ import math
 - UserIDs range between 1 and 6040 
 - MovieIDs range between 1 and 3952
 """
-def loadRatingData(lineRate=1):
+def loadRatingData(lineRate=1.0):
     data = open("ml-1m/ratings.dat").readlines()  # UserID::MovieID::Rating::Timestamp
     lineNum = len(data)
     data = [tuple(map(int, s.split("::")[:2])) for s in data]
@@ -24,13 +24,13 @@ def list2dic(L):
         retDic[item[0]].add(item[1])
     return retDic
 
-def splitData(M, k, lineRate=1, seed=1):
+def splitData(lineRate=1.0, M=8, k=0, seed=1):
     data = loadRatingData(lineRate)
     test = []
     train = []
     random.seed(seed)
     for user, item in data:
-        if random.randint(0, M) == k:
+        if random.randint(0, M - 1) == k:  # randint -> [a, b]
             test.append([user, item])
         else:
             train.append([user, item])
@@ -43,12 +43,13 @@ class Evaluator:
     GetRecommendation: function()
     rankList: dict(int: list[tuple(int, int)])
     """
-    def __init__(self, train, test, rankList, topN, dataScale):
+    def __init__(self, train, test, rankList, topN=-1, dataScale=-1, ratio=-1):
         self.train = train
         self.test = test
         self.rankList = rankList
         self.topN = topN
         self.dataScale = dataScale
+        self.ratio = ratio
 
     # recall 和 precision 应该针对test集的数据进行分析
     def recall(self):
@@ -110,5 +111,11 @@ class Evaluator:
         precision = self.precision()
         coverage = self.coverage()
         popularity = self.popularity()
-        print("dataScale:", self.dataScale, "topN:", self.topN, "precision:", precision, "recall:", recall, "coverage:", coverage, "popularity:", popularity)
+        if self.dataScale != -1:
+            print("dataScale:", self.dataScale, end=' ')
+        if self.topN != -1:
+            print("topN:", self.topN, end=' ')
+        if self.ratio != -1:
+            print("ratio:", self.ratio, end=' ')
+        print("precision:", precision, "recall:", recall, "coverage:", coverage, "popularity:", popularity)
         return recall, precision, coverage, popularity
