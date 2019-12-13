@@ -18,12 +18,27 @@
 9. 健壮性：防水军能力
 10. 商业目标：赚钱
 * 还可以加入用户类型，物品类型，时间段这三种分类维度来使用不同的推荐系统
+
 ### 第二章
+> [Code Data](http://files.grouplens.org/datasets/movielens/ml-1m.zip)
+
 #### userCF 基于用户的协同过滤算法（基于邻域）
 1. 通过用户物品列表的相似度，计算用户相似度
 2. 根据最相似的用户们所喜爱的物品，进行推荐
 3. 对结果进行评估
-> [Code Data](http://files.grouplens.org/datasets/movielens/ml-1m.zip)
-
+> 随机推荐的准确度：0.631%；只推荐热门信息的准确度：12.79%
 * userCF.py：更改了原书明显不合理的地方，增加了随机抽取部分Data进行debug的功能，但计算效率比较低，跑完整数据非常耗时
-* userCFNumpy.py：使用numpy重构，更改最耗时的相似度计算部分。直接生成userNum * itemNum的矩阵A，保存user-item的记录，利用A * A.T来计算user-user发生关联的次数。6040 * 3952的矩阵算的还是很快的。但因为没有了精确的相似度数值，只有相似度排名，所以无法达到预期的效果，但各指标随k的变化趋势是正确的
+* userCFNumpy.py：使用numpy重构，更改最耗时的相似度计算部分。直接生成userNum * itemNum的矩阵A，保存user-item的记录，利用A * A.T来计算user-user发生关联的次数，在把关联次数除以sqrt(N1 * N2)。6040 * 3952的矩阵算的还是很快的。最后结果也和书上差不多
+* userCF重视用户圈子，用户的兴趣爱好，适合用户变化比物品慢的系统（新闻）
+
+#### itemCF 基于物品的协同过滤
+1. 通过是否被同一群人交互过，来计算物品的相似度
+2. 根据用户交互过的物品列表和物品相似度，推出推荐列表
+* itemCF.py: item比user少，所以运行的能快一点，结果和书上一致，就没做numpy版
+* itemCF重视个性化，适合豆瓣，netflix这种物品变化比用户慢的系统
+
+#### LFM（隐语义模型）
+* 对物品自动归类，自动生成用户对各种类的喜爱程度
+* Prediction(u, i) = Puk * Qik (k是自动归类的类型数量)
+* 使用随机梯度下降法来学习参数
+* latentFactorModel.py：运行极慢，还在调试
