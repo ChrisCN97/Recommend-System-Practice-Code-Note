@@ -43,13 +43,20 @@ class Evaluator:
     GetRecommendation: function()
     rankList: dict(int: list[tuple(int, int)])
     """
-    def __init__(self, train, test, rankList, topN=-1, dataScale=-1, ratio=-1):
+    def __init__(self, train, test, rankList, topN=-1, dataScale=-1, ratio=-1, loopN=-1):
         self.train = train
         self.test = test
         self.rankList = rankList
         self.topN = topN
         self.dataScale = dataScale
         self.ratio = ratio
+        self.loopN = loopN
+        itemSet = set()
+        for items in train.values():
+            itemSet.update(items)
+        for items in test.values():
+            itemSet.update(items)
+        self.itemSet = itemSet
 
     # recall 和 precision 应该针对test集的数据进行分析
     def recall(self):
@@ -94,13 +101,22 @@ class Evaluator:
         itemPopularity = dict()
         for items in self.train.values():
             for item in items:
-                itemPopularity[item] = itemPopularity.get(item, 0) + 1
+                if item not in itemPopularity:
+                    itemPopularity[item] = 0
+                itemPopularity[item] += 1
+        for items in self.test.values():
+            for item in items:
+                if item not in itemPopularity:
+                    itemPopularity[item] = 0
+                itemPopularity[item] += 1
         ret = 0
         n = 0
         for user in self.test.keys():
             if len(self.rankList[user]) == 0:
                 continue
             for item in self.rankList[user]:
+                if item[0] not in self.itemSet:
+                    continue
                 ret += math.log(1 + itemPopularity[item[0]])
                 n += 1
         ret /= n
@@ -117,5 +133,7 @@ class Evaluator:
             print("topN:", self.topN, end=' ')
         if self.ratio != -1:
             print("ratio:", self.ratio, end=' ')
+        if self.loopN != -1:
+            print("loopN:", self.loopN, end=' ')
         print("precision:", precision, "recall:", recall, "coverage:", coverage, "popularity:", popularity)
         return recall, precision, coverage, popularity
