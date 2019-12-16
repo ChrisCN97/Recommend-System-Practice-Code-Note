@@ -36,6 +36,13 @@ def splitData(lineRate=1.0, M=8, k=0, seed=1):
             train.append([user, item])
     return list2dic(train), list2dic(test)
 
+def splitDataMock():
+    train = {1: {1, 3},
+             2: {1, 2, 3, 4},
+             3: {3, 4}}
+    test = {1: {3, 4}}
+    return train, test
+
 class Evaluator:
     """
     train, test: dict(int: set())
