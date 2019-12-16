@@ -42,4 +42,4 @@
 * Prediction(u, i) = Puk * Qik (k是自动归类的类型数量)
 * 使用随机梯度下降法来学习参数
 * LFM.py：运行极慢，感觉无法再快了
-* LFMBGD：尝试使用BGD进行优化，没有成功。参考[这篇文章](https://blog.csdn.net/fjssharpsword/article/details/78257126)，可能还需要在负样例生成方面进行改进。
+* LFMBGD：尝试使用BGD进行优化，没有成功。参考[这篇文章](https://blog.csdn.net/fjssharpsword/article/details/78257126)，可能还需要使用sigmoid函数，在负样例生成方面进行改进。
