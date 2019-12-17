@@ -7,34 +7,30 @@ import math
 - UserIDs range between 1 and 6040 
 - MovieIDs range between 1 and 3952
 """
-def loadRatingData(lineRate=1.0):
+def loadRatingData():
     data = open("ml-1m/ratings.dat").readlines()  # UserID::MovieID::Rating::Timestamp
-    lineNum = len(data)
     data = [tuple(map(int, s.split("::")[:2])) for s in data]
-    # 取少部分数据进行测试
-    if lineRate != 1:
-        data = random.sample(data, int(lineRate*lineNum))  # 随机抽取 lineNum 个数据
     return data
 
-def list2dic(L):
-    retDic = dict()
-    for item in L:
-        if item[0] not in retDic:
-            retDic[item[0]] = set()
-        retDic[item[0]].add(item[1])
-    return retDic
-
 def splitData(lineRate=1.0, M=8, k=0, seed=1):
-    data = loadRatingData(lineRate)
-    test = []
-    train = []
+    data = loadRatingData()
+    test, train = {}, {}
     random.seed(seed)
     for user, item in data:
         if random.randint(0, M - 1) == k:  # randint -> [a, b]
-            test.append([user, item])
+            if user not in test:
+                test[user] = set()
+            test[user].add(item)
         else:
-            train.append([user, item])
-    return list2dic(train), list2dic(test)
+            if user not in train:
+                train[user] = set()
+            train[user].add(item)
+    # 缩减数据
+    if lineRate != 1:
+        userList = random.sample(train.keys(), int(lineRate*len(train)))
+        train = {user: set(random.sample(train[user], int(lineRate*len(train[user])))) for user in userList}
+        test = {user: set(random.sample(test[user], int(lineRate*len(test[user])))) for user in userList if user in test}
+    return train, test
 
 def splitDataMock():
     train = {1: {1, 3},

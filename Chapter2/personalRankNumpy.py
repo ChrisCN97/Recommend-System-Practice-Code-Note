@@ -28,7 +28,8 @@ def personalRankNumpy(M, root, alpha):
     v = shape(M)[0]
     R = mat(zeros((v, 1)))
     R[root] = 1
-    return (1 - alpha) * linalg.inv(eye(v) - alpha * M) * R
+    R = (1 - alpha) * linalg.inv(eye(v) - alpha * M) * R
+    return R
 
 def recommend(userI, M, alpha, iStart, i2rI, topN, trainItem):
     R = personalRankNumpy(M, userI, alpha).T
@@ -58,6 +59,7 @@ def main(lineRate, alpha, topN, testN):
         if user not in train:
             rankList[user] = []
         rankList[user] = recommend(r2iU[user], M, alpha, iStart, i2rI, topN, train[user])
+    print()
     eva = tool.Evaluator(train, testNew, rankList, dataScale=lineRate, topN=topN)
     eva.show()
 
@@ -67,8 +69,8 @@ def test():
     print({u: i for i, u in enumerate(i2rU)})
 
 # lineRate, alpha, topN, testN
-main(0.1, 0.8, 50, 5)
+main(0.5, 0.8, 50, 10)
 
-
-# [[0.31390666 0.16583748 0.07581142 0.15873016 0.18905473 0.0331675,  0.06349206]]
-# {'A': 0.269336111714077, 'B': 0.18507057054096726, 'C': 0.08626975015801294, 'a': 0.1537324937273993, 'b': 0.039296071244436064, 'c': 0.19036571254903534, 'd': 0.07592929006607209}
+"""
+dataScale: 0.5 topN: 50 precision: 0.019801980198019802 recall: 0.03225806451612903
+"""
